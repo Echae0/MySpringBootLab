@@ -11,12 +11,12 @@ public class MyPropRunner implements ApplicationRunner {
     private String name;
 
     @Value("${myprop.port}")
-    private int age;
+    private int port;
 
     @Override
     public void run(ApplicationArguments args) throws Exception{
         System.out.println("myprop.name = " + name);
-        System.out.println("myprop.port = " + age);
+        System.out.println("myprop.port = " + port);
 
         args.getOptionNames()  //Set<String>
                 .forEach(name -> System.out.println(name));

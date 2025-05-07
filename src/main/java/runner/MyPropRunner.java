@@ -1,7 +1,6 @@
 package runner;
 
-import com.rookies3.myspringbootlab.config.MyEnvironment;
-import com.rookies3.myspringbootlab.property.MyPropProperties;
+import config.MyEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +9,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import property.MyPropProperties;
 
 @Component
 public class MyPropRunner implements ApplicationRunner {
@@ -23,10 +23,10 @@ public class MyPropRunner implements ApplicationRunner {
     private Environment environment;
 
     @Autowired
-    private MyPropProperties properties;
+    private property.MyPropProperties properties;
 
     @Autowired
-    private MyEnvironment myEnvironment;
+    private config.MyEnvironment myEnvironment;
 
     private Logger logger = LoggerFactory.getLogger(MyPropRunner.class);
 

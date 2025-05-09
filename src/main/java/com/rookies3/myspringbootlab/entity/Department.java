@@ -1,6 +1,7 @@
 package com.rookies3.myspringbootlab.entity;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Department {
     

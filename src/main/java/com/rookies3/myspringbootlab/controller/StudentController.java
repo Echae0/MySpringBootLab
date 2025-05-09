@@ -1,9 +1,11 @@
 package com.rookies3.myspringbootlab.controller;
 
 import com.rookies3.myspringbootlab.entity.Student;
+import com.rookies3.myspringbootlab.exception.BusinessException;
 import com.rookies3.myspringbootlab.repository.DepartmentRepository;
 import com.rookies3.myspringbootlab.repository.StudentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,13 +13,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/students")
+@RequiredArgsConstructor
 public class StudentController {
 
-    @Autowired
-    private StudentRepository studentRepository;
-
-    @Autowired
-    private DepartmentRepository departmentRepository;
+    private final StudentRepository studentRepository;
+    private final DepartmentRepository departmentRepository;
 
     @GetMapping
     public List<Student> getAllStudents() {
@@ -25,60 +25,54 @@ public class StudentController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Student> getStudentById(@PathVariable Long id) {
+    public Student getStudentById(@PathVariable Long id) {
         return studentRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new BusinessException("Student Not Found", HttpStatus.NOT_FOUND));
     }
 
     @PostMapping
-    public ResponseEntity<Student> createStudent(@RequestBody Student student) {
-        return departmentRepository.findById(student.getDepartment().getId())
+    public Student createStudent(@RequestBody Student student) {
+        Long departmentId = student.getDepartment().getId();
+        return departmentRepository.findById(departmentId)
                 .map(department -> {
                     student.setDepartment(department);
-                    Student savedStudent = studentRepository.save(student);
-                    return ResponseEntity.ok(savedStudent);
+                    return studentRepository.save(student);
                 })
-                .orElse(ResponseEntity.badRequest().build());
+                .orElseThrow(() -> new BusinessException("Department Not Found", HttpStatus.BAD_REQUEST));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Student> updateStudent(@PathVariable Long id, @RequestBody Student studentDetails) {
-        return studentRepository.findById(id)
-                .map(student -> {
-                    if (studentDetails.getName() != null) {
-                        student.setName(studentDetails.getName());
-                    }
-                    if (studentDetails.getStudentNumber() != null) {
-                        student.setStudentNumber(studentDetails.getStudentNumber());
-                    }
-                    if (studentDetails.getDepartment() != null && studentDetails.getDepartment().getId() != null) {
-                        departmentRepository.findById(studentDetails.getDepartment().getId())
-                                .ifPresent(student::setDepartment);
-                    }
-                    Student updatedStudent = studentRepository.save(student);
-                    return ResponseEntity.ok(updatedStudent);
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public Student updateStudent(@PathVariable Long id, @RequestBody Student studentDetails) {
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Student Not Found", HttpStatus.NOT_FOUND));
+
+        if (studentDetails.getName() != null) {
+            student.setName(studentDetails.getName());
+        }
+        if (studentDetails.getStudentNumber() != null) {
+            student.setStudentNumber(studentDetails.getStudentNumber());
+        }
+        if (studentDetails.getDepartment() != null && studentDetails.getDepartment().getId() != null) {
+            Long newDeptId = studentDetails.getDepartment().getId();
+            student.setDepartment(departmentRepository.findById(newDeptId)
+                    .orElseThrow(() -> new BusinessException("Department Not Found", HttpStatus.BAD_REQUEST)));
+        }
+
+        return studentRepository.save(student);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
-        return studentRepository.findById(id)
-                .map(student -> {
-                    studentRepository.delete(student);
-                    return ResponseEntity.ok().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Student Not Found", HttpStatus.NOT_FOUND));
+        studentRepository.delete(student);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/department/{departmentId}")
-    public ResponseEntity<List<Student>> getStudentsByDepartment(@PathVariable Long departmentId) {
+    public List<Student> getStudentsByDepartment(@PathVariable Long departmentId) {
         return departmentRepository.findById(departmentId)
-                .map(department -> {
-                    List<Student> students = studentRepository.findByDepartment(department);
-                    return ResponseEntity.ok(students);
-                })
-                .orElse(ResponseEntity.notFound().build());
+                .map(departmentRepository -> studentRepository.findByDepartment(departmentRepository))
+                .orElseThrow(() -> new BusinessException("Department Not Found", HttpStatus.NOT_FOUND));
     }
 }

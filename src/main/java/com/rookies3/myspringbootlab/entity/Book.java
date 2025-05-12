@@ -1,5 +1,4 @@
-package com.rookies3.myspringbootlab.entity;
-
+import com.rookies3.myspringbootlab.entity.BookDetail;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
@@ -12,10 +11,9 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @DynamicUpdate
-@ToString
 public class Book {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "book_id")
@@ -36,13 +34,6 @@ public class Book {
     @Column(nullable = false)
     private LocalDate publishDate;
 
-    @OneToOne(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @ToString.Exclude
+    @OneToOne(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private BookDetail bookDetail;
-
-    // 연관 관계 편의 메서드
-    public void setBookDetail(BookDetail bookDetail) {
-        this.bookDetail = bookDetail;
-        bookDetail.setBook(this);
-    }
 }

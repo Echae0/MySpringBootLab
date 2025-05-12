@@ -1,6 +1,7 @@
 package com.rookies3.myspringbootlab.repository;
 
 import com.rookies3.myspringbootlab.entity.Book;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,4 +14,12 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     Optional<Book> findByIsbn(String isbn);
 
     List<Book> findByAuthor(String author);
+
+    boolean existsByIsbn(String isbn);
+
+    @EntityGraph(attributePaths = "bookDetail")
+    Optional<Book> findByIdWithBookDetail(Long id);
+
+    @EntityGraph(attributePaths = "bookDetail")
+    Optional<Book> findByIsbnWithBookDetail(String isbn);
 }

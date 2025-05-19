@@ -38,4 +38,10 @@ public class Book {
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
     private BookDetail bookDetail;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "publisher_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Publisher publisher;
 }

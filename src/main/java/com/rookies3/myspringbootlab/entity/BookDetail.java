@@ -2,6 +2,9 @@ package com.rookies3.myspringbootlab.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
+
+import java.awt.print.Book;
 
 @Entity
 @Table(name = "book_details")
@@ -10,6 +13,7 @@ import lombok.*;
 @Builder
 @Getter
 @Setter
+@DynamicUpdate
 public class BookDetail {
 
     @Id
@@ -37,5 +41,14 @@ public class BookDetail {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", unique = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Book book;
+
+    public void setBook(Book book) {
+        this.book = book;
+        if (book != null && book.getBookDetail() != this) {
+            book.setBookDetail(this);
+        }
+    }
 }
